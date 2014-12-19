@@ -47,11 +47,14 @@ def getIpset():
 def addToIpset(ipList):
     """Adds the list of IPs to the evil_ips ipset"""
     date = time.strftime("%c")
-    log = [ "", date, "Added the following IPs:"]
-    for msg in log:
-        logger.info(msg)
+    added = []
     for ip in ipList:
         output = subprocess.check_output(["ipset", "add", "evil_ips", ip])
+        added.append(ip)
+
+    numIps = len(added)
+    logger.info(date + "\n" + "Added " + str(numIps) + ":\n")
+    for ip in added:
         logger.info(ip)
 
 def findNewIps(old, new):
