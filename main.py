@@ -13,7 +13,10 @@ import logging, logging.handlers
 
 LOGFILE = "blacklist_log"
 
-whitelist = open("whitelist.txt").read().splitlines()
+try:
+    whitelist = open("whitelist.txt").read().splitlines()
+except FileNotFoundError:
+    pass
 
 # Steup logging
 logger = logging.getLogger('blacklist_log')
