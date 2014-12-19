@@ -4,23 +4,22 @@
 # 
 # There is no real intelligence in place yes to check for valid attempts
 # where someone just fat fingered their attempt to login, so you can add IPs
-# to the whitelist for the moment.
+# to the whitelist.txt for the moment.
 
 import subprocess
 import sys, os
 
-whitelist = ["12.221.225.162"]
+whitelist = open("whitelist.txt").read().splitlines()
 
 def main():
     newIps = getNewIps()
     oldIps = getIpset()
     missingIps = findNewIps(oldIps, newIps)
-    #addToIpset(missingIps)
+    addToIpset(missingIps)
 
 def getNewIps():
     """Return the list of potentially new IPs to block"""
     getEvilIps = getPath() + "/get-evil-ips.sh"
-    print(getEvilIps)
     newIps = subprocess.check_output([getEvilIps])
     newIps = convertToList(newIps)
     return newIps
