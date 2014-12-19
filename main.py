@@ -8,8 +8,20 @@
 
 import subprocess
 import sys, os
+import time
+import logging, logging.handlers
+
+LOGFILE = "blacklist_log"
 
 whitelist = open("whitelist.txt").read().splitlines()
+
+# Steup logging
+logger = logging.getLogger('blacklist_log')
+logger.setLevel(logging.INFO)
+handler = logging.handlers.RotatingFileHandler(LOGFILE, 
+                                               maxBytes=1000000,
+                                               backupCount=5)
+logger.addHandler(handler)
 
 def main():
     newIps = getNewIps()
@@ -34,12 +46,13 @@ def getIpset():
 
 def addToIpset(ipList):
     """Adds the list of IPs to the evil_ips ipset"""
-    log = ["Added the following IPs:"]
+    date = time.strftime("%c")
+    log = [ "", date, "Added the following IPs:"]
+    for msg in log:
+        logger.info(msg)
     for ip in ipList:
         output = subprocess.check_output(["ipset", "add", "evil_ips", ip])
-        log.append(ip)
-    for l in log:
-        print(l)
+        logger.info(ip)
 
 def findNewIps(old, new):
     missingIps = []
