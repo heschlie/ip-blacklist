@@ -7,6 +7,7 @@
 # to the whitelist for the moment.
 
 import subprocess
+import sys, os
 
 whitelist = ["12.221.225.162"]
 
@@ -14,11 +15,13 @@ def main():
     newIps = getNewIps()
     oldIps = getIpset()
     missingIps = findNewIps(oldIps, newIps)
-    addToIpset(missingIps)
+    #addToIpset(missingIps)
 
 def getNewIps():
     """Return the list of potentially new IPs to block"""
-    newIps = subprocess.check_output(["/root/bin/get-evil-ips.sh"])
+    getEvilIps = getPath() + "/get-evil-ips.sh"
+    print(getEvilIps)
+    newIps = subprocess.check_output([getEvilIps])
     newIps = convertToList(newIps)
     return newIps
 
@@ -26,7 +29,7 @@ def getIpset():
     """Grabs the list of already blocked IPs"""
     oldIps = subprocess.check_output(["ipset", "list", "evil_ips"])
     oldIps = convertToList(oldIps)
-    # Trim ff the header lines from the ipset
+    # Trim ff the header lines from the ipset list command
     oldIps = oldIps[6:]
     return oldIps
 
@@ -42,7 +45,7 @@ def addToIpset(ipList):
 def findNewIps(old, new):
     missingIps = []
     for ip in new:
-        if ip not in old && ip not in whitelist:
+        if ip not in old and ip not in whitelist:
             missingIps.append(ip)
     return missingIps
 
@@ -55,6 +58,10 @@ def convertToList(bytestring):
     newList = bytestring.decode("utf-8").split("\n")
     newList.pop()
     return newList
+
+def getPath():
+    pathName = os.path.dirname(sys.argv[0])
+    return os.path.abspath(pathName)
 
 if __name__ == "__main__":
     main()
