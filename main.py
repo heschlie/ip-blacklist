@@ -59,6 +59,7 @@ def addToIpset(ipList):
     logger.info(date + "\n" + "Added " + str(numIps) + ":\n")
     for ip in added:
         logger.info(ip)
+    logger.info("\n")
 
 def findNewIps(old, new):
     missingIps = []
