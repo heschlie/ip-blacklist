@@ -56,7 +56,9 @@ def addToIpset(ipList):
         added.append(ip)
 
     numIps = len(added)
-    logger.info(date + "\n" + "Added " + str(numIps) + ":\n")
+    msg = date + "\n" + "Added " + str(numIps) + ":\n"
+    logger.info(msg)
+    print(msg)
     for ip in added:
         logger.info(ip)
     logger.info("\n")
