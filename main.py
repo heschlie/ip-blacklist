@@ -10,8 +10,10 @@ import subprocess
 import sys, os
 import time
 import logging, logging.handlers
+import re
 
 LOGFILE = "blacklist_log"
+ipPattern = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 
 try:
     whitelist = open("whitelist.txt").read().splitlines()
@@ -32,20 +34,33 @@ def main():
     missingIps = findNewIps(oldIps, newIps)
     addToIpset(missingIps)
 
+
 def getNewIps():
     """Return the list of potentially new IPs to block"""
-    getEvilIps = getPath() + "/get-evil-ips.sh"
-    newIps = subprocess.check_output([getEvilIps])
-    newIps = convertToList(newIps)
+    ips = {}
+    # Check the secure file for failures
+    with open('/var/log/secure', 'r') as secure:
+        for line in secure:
+            if 'Failed password for' in line:
+                ip = re.findall(ipPattern,line)
+                ips[ip[0]] = ips.get(ip[0], 0) + 1
+
+    newIps = []
+    for k, v in ips.items():
+        if v >= 5:
+            newIps.append(k)
+
     return newIps
+
 
 def getIpset():
     """Grabs the list of already blocked IPs"""
     oldIps = subprocess.check_output(["ipset", "list", "evil_ips"])
     oldIps = convertToList(oldIps)
-    # Trim ff the header lines from the ipset list command
+    # Trim off the header lines from the ipset list command
     oldIps = oldIps[6:]
     return oldIps
+
 
 def addToIpset(ipList):
     """Adds the list of IPs to the evil_ips ipset"""
@@ -63,12 +78,14 @@ def addToIpset(ipList):
         logger.info(ip)
     logger.info("\n")
 
+
 def findNewIps(old, new):
     missingIps = []
     for ip in new:
         if ip not in old and ip not in whitelist:
             missingIps.append(ip)
     return missingIps
+
 
 def convertToList(bytestring):
     """
@@ -80,9 +97,11 @@ def convertToList(bytestring):
     newList.pop()
     return newList
 
+
 def getPath():
     pathName = os.path.dirname(sys.argv[0])
     return os.path.abspath(pathName)
+
 
 if __name__ == "__main__":
     main()
