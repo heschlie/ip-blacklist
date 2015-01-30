@@ -98,10 +98,5 @@ def convertToList(bytestring):
     return newList
 
 
-def getPath():
-    pathName = os.path.dirname(sys.argv[0])
-    return os.path.abspath(pathName)
-
-
 if __name__ == "__main__":
     main()
