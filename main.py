@@ -16,6 +16,7 @@ LOGFILE = "blacklist_log"
 ipPattern = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 PATH = os.path.dirname(os.path.abspath(__file__))
 whitelistPath = PATH + "/whitelist.txt"
+ipset = "/usr/sbin/ipset"
 
 try:
     whitelist = open(whitelistPath).read().splitlines()
@@ -57,7 +58,7 @@ def getNewIps():
 
 def getIpset():
     """Grabs the list of already blocked IPs"""
-    oldIps = subprocess.check_output(["ipset", "list", "evil_ips"])
+    oldIps = subprocess.check_output([ipset, "list", "evil_ips"])
     oldIps = convertToList(oldIps)
     # Trim off the header lines from the ipset list command
     oldIps = oldIps[6:]
@@ -69,7 +70,7 @@ def addToIpset(ipList):
     date = time.strftime("%c")
     added = []
     for ip in ipList:
-        output = subprocess.check_output(["ipset", "add", "evil_ips", ip])
+        output = subprocess.check_output([ipset, "add", "evil_ips", ip])
         added.append(ip)
 
     numIps = len(added)
