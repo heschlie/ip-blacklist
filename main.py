@@ -14,9 +14,11 @@ import re
 
 LOGFILE = "blacklist_log"
 ipPattern = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+PATH = os.path.dirname(os.path.abspath(__file__))
+whitelistPath = PATH + "/whitelist.txt"
 
 try:
-    whitelist = open("whitelist.txt").read().splitlines()
+    whitelist = open(whitelistPath).read().splitlines()
 except FileNotFoundError:
     pass
 
