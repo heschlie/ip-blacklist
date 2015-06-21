@@ -1,7 +1,7 @@
-#!/usr/local/bin/python3.4
+#!/usr/bin/python3
 # This script will check the /var/log/secure file for IP
 # addreses that are trying to access the machine and failing
-# 
+#
 # There is no real intelligence in place yes to check for valid attempts
 # where someone just fat fingered their attempt to login, so you can add IPs
 # to the whitelist.txt for the moment.
@@ -16,7 +16,11 @@ LOGFILE = "blacklist_log"
 ipPattern = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 PATH = os.path.dirname(os.path.abspath(__file__))
 whitelistPath = PATH + "/whitelist.txt"
-ipset = "/usr/sbin/ipset"
+ipset = "/sbin/ipset"
+if os.path.isfile('/var/log/secure'):
+    SECURE = '/var/log/secure'
+elif os.path.isfile('/var/log/auth.log'):
+    SECURE = '/var/log/auth.log'
 
 try:
     whitelist = open(whitelistPath).read().splitlines()
@@ -26,7 +30,7 @@ except FileNotFoundError:
 # Steup logging
 logger = logging.getLogger('blacklist_log')
 logger.setLevel(logging.INFO)
-handler = logging.handlers.RotatingFileHandler(LOGFILE, 
+handler = logging.handlers.RotatingFileHandler(LOGFILE,
                                                maxBytes=1000000,
                                                backupCount=5)
 logger.addHandler(handler)
@@ -42,7 +46,7 @@ def getNewIps():
     """Return the list of potentially new IPs to block"""
     ips = {}
     # Check the secure file for failures
-    with open('/var/log/secure', 'r') as secure:
+    with open(SECURE, 'r') as secure:
         for line in secure:
             if 'Failed password for' in line:
                 ip = re.findall(ipPattern,line)
